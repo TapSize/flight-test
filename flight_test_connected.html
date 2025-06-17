@@ -3,7 +3,7 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <title>Тест з Правил виконання польотів</title>
+  <title>Тести із знань ПВП ДАУ</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -27,7 +27,7 @@
       display: block;
       margin: 10px 0;
     }
-    input[type="text"] {
+    select, input[type="text"] {
       width: 100%;
       padding: 10px;
       font-size: 16px;
@@ -46,6 +46,14 @@
     .submit-btn:hover {
       background: #27ae60;
     }
+    #notice {
+      margin-bottom: 20px;
+      padding: 12px;
+      border-radius: 5px;
+      background-color: #fce4e4;
+      color: #c62828;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -53,41 +61,30 @@
 <h1>Тести із знань ПВП ДАУ</h1>
 
 <form id="flightForm">
-  <div id="notice" style="margin-bottom: 20px; padding: 12px; border-radius: 5px; background-color: #fce4e4; color: #c62828; display: none;"></div>
+  <div id="notice"></div>
+
   <div class="question">
     <label for="name"><strong>Оберіть своє прізвище:</strong></label>
     <select id="name" name="name" required>
       <option value="">-- Оберіть зі списку --</option>
-      <option>Ней О.А.</option>
-      <option>Савчук О.Б.</option>
-      <option>Павловський Е.В.</option>
-      <option>Рубай Я.В.</option>
-      <option>Оданець В.О.</option>
-      <option>Заболотний В.С.</option>
-      <option>Кириленко В.А.</option>
-      <option>Омельченко Б.О.</option>
-      <option>Добронравов Д.В.</option>
-      <option>Омельченко В.М.</option>
-      <option>Кузнєцов Р.М.</option>
-      <option>Павленко С.В.</option>
-      <option>Хоменко О.С.</option>
-      <option>Цілинко В.О.</option>
-      <option>Беззубко С.С.</option>
-      <option>Тимчук Ж.А.</option>
-      <option>Каріка С.Ю.</option>
-      <option>Михайлишин В.Я.</option>
-      <option>Бик М.В.</option>
-      <option>Дудич О.І.</option>
+      <option>Ней О.А.</option><option>Савчук О.Б.</option><option>Павловський Е.В.</option>
+      <option>Рубай Я.В.</option><option>Оданець В.О.</option><option>Заболотний В.С.</option>
+      <option>Кириленко В.А.</option><option>Омельченко Б.О.</option><option>Добронравов Д.В.</option>
+      <option>Омельченко В.М.</option><option>Кузнєцов Р.М.</option><option>Павленко С.В.</option>
+      <option>Хоменко О.С.</option><option>Цілинко В.О.</option><option>Беззубко С.С.</option>
+      <option>Тимчук Ж.А.</option><option>Каріка С.Ю.</option><option>Михайлишин В.Я.</option>
+      <option>Бик М.В.</option><option>Дудич О.І.</option>
     </select>
   </div>
 
-  <!-- JS буде вставляти 30 питань тут -->
   <div id="questionsContainer"></div>
 
   <button type="submit" class="submit-btn">Надіслати відповіді</button>
 </form>
 
 <script>
+  const endpoint = "https://script.google.com/macros/s/AKfycbzG1CFdEVt5FRr8Ydj0pJHJ491iGJl8Nd9nVld_2_yli3UD1ZSBdd3ghgIZNu9j8RxvaA/exec";
+
   const questions = [
     "За яких умов польоти вертольотів дозволяється виконувати без наявності запасного аеродрому?",
     "Що є підставою для виконання польотів екіпажем при виконанні авіаційних робіт у відриві від частини?",
@@ -114,14 +111,12 @@
     ["Ознайомлювальний з подвійним управлінням", "Бойовий у СМУ", "Контрольний після ремонту", "ПРП над морем"]
   ];
 
-  // Повторити до 30 питань
   const fullSet = [];
   for (let i = 0; i < 30; i++) {
     const qIndex = i % 10;
-    fullSet.push({ text: questions[qIndex], choices: options[qIndex] });
+    fullSet.push({ text: questions[qIndex], choices: options[qIndex], correct: 0 });
   }
 
-  // Перемішати
   fullSet.sort(() => Math.random() - 0.5);
 
   const container = document.getElementById("questionsContainer");
@@ -131,84 +126,60 @@
     block.innerHTML = `
       <p><strong>${i + 1}. ${q.text}</strong></p>
       ${q.choices.map((opt, j) => `
-        <label><input type="radio" data-correct name="q${i}" value="${opt}" required> ${opt}</label>
+        <label><input type="radio" name="q${i}" value="${opt}" ${j === q.correct ? 'data-correct' : ''}> ${opt}</label>
       `).join("")}
     `;
     container.appendChild(block);
   });
 
   document.getElementById("flightForm").addEventListener("submit", function(e) {
-  e.preventDefault();
-  const name = document.getElementById("name").value;
-  const answers = [];
-  let correctCount = 0;
-  const totalQuestions = 30;
-
-  if (!name) {
-    showNotice("Будь ласка, оберіть своє прізвище зі списку.");
-    return;
-  }
-
-  for (let i = 0; i < totalQuestions; i++) {
-    const val = document.querySelector(`input[name="q${i}"]:checked`);
-    if (val) {
-      answers.push(val.value);
-      if (val.hasAttribute("data-correct")) correctCount++;
-    } else {
-      answers.push("");
-    }
-  }
-
-  const answered = answers.filter(v => v !== "").length;
-  if (answered < totalQuestions) {
-    showNotice("Ви повинні відповісти на всі 30 питань перед відправленням форми. Ви відповіли лише на " + answered + ".");
-    return;
-  }
-
-  showNotice("Ви правильно відповіли на " + correctCount + " із 30 питань!");
-
-  fetch(endpoint, {
-    method: "POST",
-    body: JSON.stringify({ name, score: correctCount }),
-    headers: { "Content-Type": "application/json" }
-  }).then(res => {
-    if (res.ok) {
-      location.reload();
-    } else {
-      alert("Помилка надсилання.");
-    }
-  });
     e.preventDefault();
     const name = document.getElementById("name").value;
     const answers = [];
-    for (let i = 0; i < 30; i++) {
-      const val = document.querySelector(`input[name="q${i}"]:checked`);
-      answers.push(val ? val.value : "");
+    let correctCount = 0;
+
+    if (!name) {
+      showNotice("Будь ласка, оберіть своє прізвище зі списку.");
+      return;
     }
 
-    // ⬇️ ТУТ ВСТАВИТИ СВОЮ URL Google Apps Script Web App
-    const endpoint = "https://script.google.com/macros/s/AKfycbzG1CFdEVt5FRr8Ydj0pJHJ491iGJl8Nd9nVld_2_yli3UD1ZSBdd3ghgIZNu9j8RxvaA/exec";
+    for (let i = 0; i < 30; i++) {
+      const val = document.querySelector(`input[name="q${i}"]:checked`);
+      if (val) {
+        answers.push(val.value);
+        if (val.hasAttribute("data-correct")) correctCount++;
+      } else {
+        answers.push("");
+      }
+    }
+
+    const answered = answers.filter(v => v !== "").length;
+    if (answered < 30) {
+      showNotice("Ви повинні відповісти на всі 30 питань перед відправленням форми. Ви відповіли лише на " + answered + ".");
+      return;
+    }
+
+    showNotice("Ви правильно відповіли на " + correctCount + " із 30 питань!");
 
     fetch(endpoint, {
       method: "POST",
-      body: JSON.stringify({ name, answers }),
+      body: JSON.stringify({ name, score: correctCount }),
       headers: { "Content-Type": "application/json" }
     }).then(res => {
       if (res.ok) {
-        alert("Відповіді надіслано успішно!");
-        location.reload();
+        setTimeout(() => location.reload(), 2500);
       } else {
-        alert("Помилка надсилання.");
+        showNotice("Помилка надсилання відповіді.");
       }
     });
   });
 
-function showNotice(message) {
-  const notice = document.getElementById("notice");
-  notice.innerText = message;
-  notice.style.display = "block";
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
+  function showNotice(message) {
+    const notice = document.getElementById("notice");
+    notice.innerText = message;
+    notice.style.display = "block";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 </script>
 
 </body>

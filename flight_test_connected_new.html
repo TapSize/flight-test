@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Тести із знань ПВП ДАУ</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f7f9;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .question {
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    label {
+      display: block;
+      margin: 10px 0;
+    }
+    select, input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+    }
+    .submit-btn {
+      background: #2ecc71;
+      color: white;
+      padding: 12px 25px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: block;
+      margin: 20px auto;
+    }
+    .submit-btn:hover {
+      background: #27ae60;
+    }
+    #notice {
+      margin-bottom: 20px;
+      padding: 12px;
+      border-radius: 5px;
+      background-color: #fce4e4;
+      color: #c62828;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Тести із знань ПВП ДАУ</h1>
+
+<form id="flightForm">
+  <div id="notice"></div>
+
+  <div class="question">
+    <label for="name"><strong>Оберіть своє прізвище:</strong></label>
+    <select id="name" name="name" required>
+      <option value="">-- Оберіть зі списку --</option>
+      <option>Ней О.А.</option><option>Савчук О.Б.</option><option>Павловський Е.В.</option>
+      <option>Рубай Я.В.</option><option>Оданець В.О.</option><option>Заболотний В.С.</option>
+      <option>Кириленко В.А.</option><option>Омельченко Б.О.</option><option>Добронравов Д.В.</option>
+      <option>Омельченко В.М.</option><option>Кузнєцов Р.М.</option><option>Павленко С.В.</option>
+      <option>Хоменко О.С.</option><option>Цілинко В.О.</option><option>Беззубко С.С.</option>
+      <option>Тимчук Ж.А.</option><option>Каріка С.Ю.</option><option>Михайлишин В.Я.</option>
+      <option>Бик М.В.</option><option>Дудич О.І.</option>
+    </select>
+  </div>
+
+  <div id="questionsContainer"></div>
+
+  <button type="submit" class="submit-btn">Надіслати відповіді</button>
+</form>
+
+<script>
+  const endpoint = "https://script.google.com/macros/s/AKfycbw7DYSkqSF3ubHCvxaeUETzeEsReudik9BPNDsZGS4cDxnhCwEUT21XPMiNKC6t4n_c7w/exec";
+
+  const questions = [
+    "За яких умов польоти вертольотів дозволяється виконувати без наявності запасного аеродрому?",
+    "Що є підставою для виконання польотів екіпажем при виконанні авіаційних робіт у відриві від частини?",
+    "Який документ використовується для графічного і текстового відображення завдань екіпажам на льотну зміну?",
+    "Хто має право приймати рішення про зміну завдання на політ у разі відриву від частини?",
+    "У разі виконання польотів у відриві від бази, хто відповідає за організацію наземної підготовки екіпажу?",
+    "Що обов’язково має бути на борту вертольота при перельоті, крім польотного листа?",
+    "Який мінімальний відпочинок надається екіпажу перед змішаною (день-ніч) льотною зміною?",
+    "Яка максимально допустима тривалість нальоту екіпажу вертольота за добу під час перельоту?",
+    "Що означає абревіатура ПВП у контексті польотів?",
+    "Який тип польоту дозволяється виконувати без повного складу екіпажу?"
+  ];
+
+  const options = [
+    ["У межах району аеродрому в ПМУ та СМУ", "У будь-яких умовах", "Уночі в СМУ", "Поза аеродромом у СМУ"],
+    ["Завдання командира частини", "Метеодокументація", "Графік зміни", "КрП на полігоні"],
+    ["Планова таблиця", "Польотний лист", "ІВП", "КЛЕ ПС"],
+    ["Командир екіпажу", "Черговий штурман", "Особа, що підписала польотний лист", "КрП"],
+    ["Командир екіпажу", "Командир частини", "Інструктор", "Інженер"],
+    ["Радіонавігаційна карта", "Журнал КрП", "Зошит", "Розклад"],
+    ["6 годин", "2 години", "4 години, 2 зі сном", "8 годин"],
+    ["10 годин", "8 годин", "6 годин", "12 годин"],
+    ["Політ за візуальними правилами", "Повітряна підтримка", "Попередня підготовка", "Порядок польотів"],
+    ["Ознайомлювальний з подвійним управлінням", "Бойовий у СМУ", "Контрольний після ремонту", "ПРП над морем"]
+  ];
+
+  const fullSet = [];
+  for (let i = 0; i < 30; i++) {
+    const qIndex = i % 10;
+    fullSet.push({ text: questions[qIndex], choices: options[qIndex], correct: 0 });
+  }
+
+  fullSet.sort(() => Math.random() - 0.5);
+
+  const container = document.getElementById("questionsContainer");
+  fullSet.forEach((q, i) => {
+    const block = document.createElement("div");
+    block.className = "question";
+    block.innerHTML = `
+      <p><strong>${i + 1}. ${q.text}</strong></p>
+      ${q.choices.map((opt, j) => `
+        <label><input type="radio" name="q${i}" value="${opt}" ${j === q.correct ? 'data-correct' : ''}> ${opt}</label>
+      `).join("")}
+    `;
+    container.appendChild(block);
+  });
+
+  document.getElementById("flightForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    const name = document.getElementById("name").value;
+    const answers = [];
+    let correctCount = 0;
+
+    if (!name) {
+      showNotice("Будь ласка, оберіть своє прізвище зі списку.");
+      return;
+    }
+
+    for (let i = 0; i < 30; i++) {
+      const val = document.querySelector(`input[name="q${i}"]:checked`);
+      if (val) {
+        answers.push(val.value);
+        if (val.hasAttribute("data-correct")) correctCount++;
+      } else {
+        answers.push("");
+      }
+    }
+
+    const answered = answers.filter(v => v !== "").length;
+    if (answered < 30) {
+      showNotice("Ви повинні відповісти на всі 30 питань перед відправленням форми. Ви відповіли лише на " + answered + ".");
+      return;
+    }
+
+    showNotice("Ви правильно відповіли на " + correctCount + " із 30 питань!");
+
+    fetch(endpoint, {
+      method: "POST",
+      body: JSON.stringify({ name, score: correctCount }),
+      headers: { "Content-Type": "application/json" }
+    }).then(res => {
+      if (res.ok) {
+        setTimeout(() => location.reload(), 2500);
+      } else {
+        showNotice("Помилка надсилання відповіді.");
+      }
+    });
+  });
+
+  function showNotice(message) {
+    const notice = document.getElementById("notice");
+    notice.innerText = message;
+    notice.style.display = "block";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+</script>
+
+</body>
+</html>
